@@ -1,3 +1,4 @@
+from django.core.mail import send_mail
 from django.shortcuts import redirect
 from django.views import View
 import stripe
@@ -69,3 +70,49 @@ class ProductLandingPageView(TemplateView):
 
 
         return context
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        # Invalid payload
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return HttpResponse(status=400)
+
+    # Handle the checkout.session.completed event
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        customer_email = session["customer_details"]["email"]
+        payment_intent = session["payment_intent"]
+
+        # Handle the checkout.session.completed event
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+            customer_email = session["customer_details"]["email"]
+            line_items = stripe.checkout.Session.list_line_items(session["id"])
+
+            stripe_price_id = line_items["data"][0]["price"]["id"]
+            price = Price.objects.get(stripe_price_id=stripe_price_id)
+            product = price.product
+
+            send_mail(
+                subject="Here is your product",
+                message=f"Thanks for your donation.",
+                recipient_list=[customer_email],
+                from_email="your@email.com"
+            )
+
+    return HttpResponse(status=200)

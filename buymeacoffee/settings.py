@@ -6,9 +6,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', None)
 
-STRIPE_SECRET_KEY = stripe.api_key = os.environ.get('STRIPE_SK', None)
-STRIPE_PUBLIC_KEY = stripe.api_key = os.environ.get('STRIPE_PK', None)
-STRIPE_WEBHOOK_SECRET = ""
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SK', None)
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PK', None)
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', None)
 
 
 DEBUG = True
@@ -100,6 +100,10 @@ USE_I18N = True
 
 USE_TZ = True
 
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
+# python -m smtpd -n -c DebuggingServer localhost:1025
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
