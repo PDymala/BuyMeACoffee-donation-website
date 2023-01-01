@@ -1,9 +1,14 @@
+import os
+
 from django.core.mail import send_mail
 from django.shortcuts import redirect
 from django.views import View
 import stripe
 from django.conf import settings
 from django.views.generic import TemplateView
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -11,11 +16,11 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 class CreateCheckoutSessionView(View):
     def post(self, request, *args, **kwargs):
         price = Price.objects.get(id=self.kwargs["pk"])
-        domain = "https://yourdomain.com"
+        domain = "https://buymeacoffee-vpcuqkwkfq-ew.a.run.app"
         if settings.DEBUG:
             domain = "http://127.0.0.1:8000"
         checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
+            payment_method_types=['card', 'p24', 'blik'],
             line_items=[
                 {
                     'price': price.stripe_price_id,
@@ -36,24 +41,13 @@ class SuccessView(TemplateView):
 class CancelView(TemplateView):
     template_name = "cancel.html"
 
+
 from .models import Product, Price
 
 
 class ProductLandingPageView(TemplateView):
     template_name = "landing.html"
-    # one products with multiple prices
-    # def get_context_data(self, **kwargs):
-    #     product = Product.objects.get(name="Sunglasses")
-    #     prices = Price.objects.filter(product=product)
-    #     context = super(ProductLandingPageView,
-    #                     self).get_context_data(**kwargs)
-    #     context.update({
-    #         "product": product,
-    #         "prices": prices
-    #     })
-    #     return context
 
-    # multiple products with 1 price
     def get_context_data(self, **kwargs):
         products_in_db = Product.objects.all()
 
@@ -67,13 +61,8 @@ class ProductLandingPageView(TemplateView):
             "products": products_with_prices
         })
 
-
-
         return context
 
-
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
 
 @csrf_exempt
 def stripe_webhook(request):
@@ -112,7 +101,7 @@ def stripe_webhook(request):
                 subject="Here is your product",
                 message=f"Thanks for your donation.",
                 recipient_list=[customer_email],
-                from_email="your@email.com"
+                from_email=os.environ.get('EMAIL_HOST_USER', None)
             )
 
     return HttpResponse(status=200)

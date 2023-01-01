@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-import stripe
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -11,10 +11,11 @@ STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PK', None)
 STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', None)
 
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['buymeacoffee-vpcuqkwkfq-ew.a.run.app']
 
+CSRF_TRUSTED_ORIGINS=['https://*.buymeacoffee-vpcuqkwkfq-ew.a.run.app']
 
 # Application definition
 
@@ -100,16 +101,27 @@ USE_I18N = True
 
 USE_TZ = True
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 1025
+
+# local email
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_HOST = 'localhost'
+# EMAIL_PORT = 1025
 # python -m smtpd -n -c DebuggingServer localhost:1025
+
+
+# standard email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', None)
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', None)
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', None)
+EMAIL_PORT = os.environ.get('EMAIL_PORT', None)
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', None)
+DEFAULT_FROM_EMAIL = 'default from email'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
-
 STATIC_URL = '/static/'
-
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
