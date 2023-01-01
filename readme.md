@@ -36,7 +36,7 @@ EMAIL_USE_TLS=
 ### Django database
 Add all your products (from stripe) to django database. Keep in mind to write stripe product id and its price id
 
-<img src="django_db.PNG" height="200" />
+<img src="django_db.png" height="200" />
 
 
 ### Deploy
